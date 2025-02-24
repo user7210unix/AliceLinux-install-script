@@ -2,14 +2,11 @@
 
 # Define variables
 ROOTFS_URL="https://codeberg.org/emmett1/alicelinux/releases/download/20241006/alicelinux-rootfs-20241006.tar.xz"
-SHA256SUM_URL="${ROOTFS_URL}.sha256sum"
 MOUNT_POINT="/mnt/alice"
 REPO_DIR="/var/lib/alicelinux"
 APKG_CONF="/etc/apkg.conf"
 PACKAGES=(
-    "autils"
     "b3sum"
-    "baselayout"
     "binutils"
     "bison"
     "busybox"
@@ -21,7 +18,6 @@ PACKAGES=(
     "gcc"
     "git"
     "gmp"
-    "initscripts"
     "linux-headers"
     "m4"
     "make"
@@ -30,11 +26,11 @@ PACKAGES=(
     "musl"
     "openssl"
     "patch"
-    "spm"
     "xz"
     "zlib"
     "linux"
     "linux-firmware"
+    "linux-firmware-nvidia"
     "grub"
     "meson"
     "cmake"
@@ -55,18 +51,9 @@ read -p "Timezone (e.g., Asia/Kuala_Lumpur): " TIMEZONE
 echo "Updating package database and installing necessary tools on the host system..."
 sudo pacman -Syu --needed arch-install-scripts curl tar git ${PACKAGES[@]}
 
-# Download the rootfs tarball and its sha256sum file
-echo "Downloading AliceLinux rootfs tarball and sha256sum file..."
+# Download the rootfs tarball
+echo "Downloading AliceLinux rootfs tarball..."
 curl -O $ROOTFS_URL
-curl -O $SHA256SUM_URL
-
-# Verify the checksum
-echo "Verifying checksum..."
-sha256sum -c alicelinux-rootfs-20241006.tar.xz.sha256sum
-if [ $? -ne 0 ]; then
-    echo "Checksum verification failed!"
-    exit 1
-fi
 
 # Prepare the partition and filesystem
 echo "Preparing the partition and filesystem..."
@@ -123,7 +110,7 @@ done
 
 # Install kernel and firmware
 echo "Installing kernel and firmware..."
-apkg -I linux linux-firmware
+apkg -I linux linux-firmware linux-firmware-nvidia
 
 # Install bootloader
 echo "Installing bootloader..."
