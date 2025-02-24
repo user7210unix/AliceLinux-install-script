@@ -1,0 +1,1 @@
+# AliceLinux-install-script
