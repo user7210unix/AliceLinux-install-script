@@ -51,7 +51,6 @@ PACKAGES=(
 # Prompt for user input
 echo "Please enter the following details:"
 read -p "Username: " USERNAME
-read -p "Disk (e.g., /dev/sdXY): " DISK
 read -p "SSID: " SSID
 read -sp "SSID Password: " SSID_PASSWORD
 echo
@@ -76,9 +75,11 @@ fi
 
 # Prepare the partition and filesystem
 echo "Preparing the partition and filesystem..."
-sudo mkfs.ext4 $DISK
+sudo mkfs.ext4 /dev/sda1  # Root partition
+sudo mkswap /dev/sda2     # Swap partition (optional)
+sudo swapon /dev/sda2     # Enable swap
 sudo mkdir -p $MOUNT_POINT
-sudo mount $DISK $MOUNT_POINT
+sudo mount /dev/sda1 $MOUNT_POINT
 
 # Extract the rootfs tarball
 echo "Extracting the rootfs tarball..."
@@ -132,7 +133,7 @@ apkg -I linux linux-firmware linux-firmware-nvidia
 # Install bootloader
 echo "Installing bootloader..."
 apkg -I grub
-grub-install /dev/sdX
+grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Set hostname
@@ -141,8 +142,8 @@ echo "alice" > /etc/hostname
 
 # Configure fstab
 echo "Configuring fstab..."
-echo '/dev/sda1 swap swap defaults 0 1' >> /etc/fstab
-echo '/dev/sda2 / ext4 defaults 0 0' >> /etc/fstab
+echo '/dev/sda1 / ext4 defaults 0 1' >> /etc/fstab
+echo '/dev/sda2 swap swap defaults 0 0' >> /etc/fstab
 
 # Enable runit services
 echo "Enabling runit services..."
@@ -175,6 +176,7 @@ EOF
 
 # Exit chroot and unmount
 echo "Exiting chroot and unmounting..."
+sudo swapoff /dev/sda2
 sudo umount $MOUNT_POINT
 
 echo "Installation complete! Reboot your system."
