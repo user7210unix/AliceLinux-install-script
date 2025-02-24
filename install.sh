@@ -67,9 +67,17 @@ sudo mount /dev/sda1 $MOUNT_POINT
 echo "Extracting the rootfs tarball..."
 sudo tar xvf alicelinux-rootfs-20241006.tar.xz -C $MOUNT_POINT
 
+# Ensure necessary directories exist within the chroot
+sudo mkdir -p $MOUNT_POINT/var/cache/pkg
+sudo mkdir -p $MOUNT_POINT/var/cache/src
+sudo mkdir -p $MOUNT_POINT/var/cache/work
+
+# Copy necessary binaries to the chroot environment
+sudo cp /usr/bin/env $MOUNT_POINT/usr/bin/
+
 # Enter chroot
 echo "Entering chroot environment..."
-sudo $MOUNT_POINT/usr/bin/apkg-chroot $MOUNT_POINT /bin/bash <<EOF
+sudo chroot $MOUNT_POINT /bin/bash <<EOF
 
 # Clone Alice repos
 echo "Cloning Alice repositories..."
@@ -83,11 +91,6 @@ echo 'export CXXFLAGS="$CFLAGS"' >> $APKG_CONF
 echo 'export MAKEFLAGS="-j6"' >> $APKG_CONF
 echo 'export NINJAJOBS="6"' >> $APKG_CONF
 echo 'APKG_REPO="/var/lib/alicelinux/repos/core /var/lib/alicelinux/repos/extra"' >> $APKG_CONF
-
-# Create necessary directories
-mkdir -p /var/cache/pkg
-mkdir -p /var/cache/src
-mkdir -p /var/cache/work
 
 # Add directories to apkg.conf
 echo 'APKG_PACKAGE_DIR=/var/cache/pkg' >> $APKG_CONF
