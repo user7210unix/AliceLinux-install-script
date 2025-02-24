@@ -57,9 +57,9 @@ read -sp "SSID Password: " SSID_PASSWORD
 echo
 read -p "Timezone (e.g., Asia/Kuala_Lumpur): " TIMEZONE
 
-# Install necessary tools on the host system using pacman
-echo "Installing necessary tools on the host system..."
-sudo pacman -Syu --needed curl tar git
+# Update package database and install necessary tools on the host system
+echo "Updating package database and installing necessary tools on the host system..."
+sudo pacman -Syu --needed arch-install-scripts curl tar git ${PACKAGES[@]}
 
 # Download the rootfs tarball and its sha256sum file
 echo "Downloading AliceLinux rootfs tarball and sha256sum file..."
@@ -87,6 +87,11 @@ sudo tar xvf alicelinux-rootfs-20241006.tar.xz -C $MOUNT_POINT
 # Enter chroot
 echo "Entering chroot environment..."
 sudo $MOUNT_POINT/usr/bin/apkg-chroot $MOUNT_POINT /bin/bash <<EOF
+
+# Clone Alice repos
+echo "Cloning Alice repositories..."
+cd $REPO_DIR
+git clone --depth=1 https://codeberg.org/emmett1/alicelinux
 
 # Configure apkg
 echo "Configuring apkg..."
