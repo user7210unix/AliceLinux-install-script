@@ -35,7 +35,6 @@ PACKAGES=(
     "zlib"
     "linux"
     "linux-firmware"
-    "linux-firmware-nvidia"
     "grub"
     "meson"
     "cmake"
@@ -43,7 +42,6 @@ PACKAGES=(
     "libtool"
     "automake"
     "perl"
-    "wpa_supplicant"
     "dhcpcd"
     "tzdata"
 )
@@ -51,9 +49,6 @@ PACKAGES=(
 # Prompt for user input
 echo "Please enter the following details:"
 read -p "Username: " USERNAME
-read -p "SSID: " SSID
-read -sp "SSID Password: " SSID_PASSWORD
-echo
 read -p "Timezone (e.g., Asia/Kuala_Lumpur): " TIMEZONE
 
 # Update package database and install necessary tools on the host system
@@ -128,7 +123,7 @@ done
 
 # Install kernel and firmware
 echo "Installing kernel and firmware..."
-apkg -I linux linux-firmware linux-firmware-nvidia
+apkg -I linux linux-firmware
 
 # Install bootloader
 echo "Installing bootloader..."
@@ -160,11 +155,9 @@ adduser $USERNAME video
 adduser $USERNAME audio
 passwd
 
-# Setup networking
-echo "Setting up networking..."
-apkg -I wpa_supplicant dhcpcd
-wpa_passphrase $SSID $SSID_PASSWORD >> /etc/wpa_supplicant.conf
-ln -s /etc/sv/wpa_supplicant /var/service
+# Setup networking for LAN
+echo "Setting up networking for LAN..."
+apkg -I dhcpcd
 ln -s /etc/sv/dhcpcd /var/service
 
 # Set timezone
